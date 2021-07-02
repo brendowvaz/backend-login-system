@@ -3,6 +3,7 @@ const Boom = require('@hapi/boom');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 const services = require('./services');
 const privateKey  = fs.readFileSync(path.join(__dirname,'private.key'))
@@ -23,10 +24,11 @@ module.exports = {
       response.status = 400;
       return response.body = Boom.badRequest(null, erros);
     }
-
+    response.body = body
     const user = await services.auth(body);
+    const passwordValidate = bcrypt.compareSync(body.password, user.password);
 
-    if (user) {
+    if (passwordValidate) {
       response.body = {
         firstName: user.firstName,
         result: jwt.sign({ email: user.email }, privateKey)

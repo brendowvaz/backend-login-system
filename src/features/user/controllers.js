@@ -1,9 +1,8 @@
 const Validator = require('fastest-validator');
 const Boom = require('@hapi/boom');
 const services = require('./services');
-//const crypto = require("crypto");
+const bcrypt = require('bcryptjs');
 
-//const cipher = crypto.createCipher();
 const v = new Validator();
 
 module.exports = {
@@ -22,6 +21,11 @@ module.exports = {
       response.status = 400;
       return response.body = Boom.badRequest(null, erros);
     }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(body.password, salt);
+
+    body.password = hash;
 
     const user = await services.create(body);
     response.body = user;
